@@ -1,59 +1,54 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# CivicTrack
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel 12 application for reporting infrastructure problems. Visitors submit reports and optional photos; an administrator reviews reports and updates their status, priority, and public official note.
 
-## About Laravel
+## Local setup (SQLite)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Requires PHP 8.2+, Composer, Node.js 22+, and PHP SQLite, mbstring, and XML extensions.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+```sh
+composer install
+cp .env.example .env
+php artisan key:generate
+touch database/database.sqlite
+```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Set a strong `ADMIN_PASSWORD` in `.env`. If your existing `.env` uses MySQL, change `DB_CONNECTION=sqlite` and remove its `DB_DATABASE` setting (or set an absolute SQLite file path). This does not transfer existing MySQL records.
 
-## Learning Laravel
+```sh
+php artisan migrate
+php artisan storage:link
+npm ci
+npm run build
+php artisan serve
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+Visit `/issues` and `/admin/login`. Admin login is disabled until `ADMIN_PASSWORD` is set. Official notes are visible publicly. Reporter email and phone are shown only to administrators.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Deploy on Render with SQLite
 
-## Laravel Sponsors
+Render requires a **paid web service with a persistent disk** to retain SQLite records and uploaded photos across restarts. The supplied `render.yaml` uses the Starter plan and a 1 GB disk. Review current costs in Render before creating the service. A free service loses local data on redeploy/restart.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+1. Push this project, including `Dockerfile`, `docker/`, and `render.yaml`, to your Git repository. Never commit `.env`, database files, or uploaded photos.
+2. In Render choose **New → Blueprint**, connect the repository, and select this directory as the Blueprint location if the repository contains multiple projects.
+3. Supply the prompted environment variables:
+   - `APP_KEY`: generate locally with `php artisan key:generate --show`. Keep this value unchanged across redeploys.
+   - `ADMIN_PASSWORD`: a strong unique password.
+   - `APP_URL`: the final HTTPS service URL, for example `https://civictrack.onrender.com`. Update it if Render assigns a different hostname or you add a custom domain.
+4. Deploy. The container builds frontend assets, installs production PHP dependencies, creates the database only if missing, runs migrations, links public uploads, and starts Apache on port 80.
+5. Verify `/up`, submit a report with a photo, sign in at `/admin/login`, update its status, and redeploy to confirm the report and photo remain available.
 
-### Premium Partners
+The disk mounts at `/var/www/html/storage`; SQLite lives at `/var/www/html/storage/database/database.sqlite` and photos at `storage/app/public`. Migrations run at container startup because Render disks are unavailable during builds and pre-deploy commands. Keep this service at one instance when using SQLite. Existing local data is not uploaded automatically; the deployment starts empty.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+If configuring manually, use Docker runtime, health check `/up`, the same disk mount, and all environment values from `render.yaml`. Never generate a new application key automatically at startup. Back up records using SQLite's backup command/API and copy uploaded photos separately; do not copy a live database file without a consistent backup process.
 
-## Contributing
+Render documentation: https://render.com/docs/disks and https://render.com/docs/docker
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Verification
 
-## Code of Conduct
+```sh
+php artisan test
+npm run build
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Feature tests use an isolated in-memory SQLite database. They cover submission and photos, public visibility, administrator login/logout, rate limits, and resolution timestamps.

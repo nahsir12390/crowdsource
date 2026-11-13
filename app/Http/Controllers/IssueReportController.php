@@ -25,7 +25,7 @@ class IssueReportController extends Controller
         $reports = $query->paginate(9)->withQueryString();
 
         $stats = [
-            'total' => IssueReport::count(),
+            'total' => IssueReport::visible()->count(),
             'pending' => IssueReport::where('status', 'pending')->count(),
             'in_progress' => IssueReport::where('status', 'in_progress')->count(),
             'resolved' => IssueReport::where('status', 'resolved')->count(),
@@ -56,8 +56,8 @@ class IssueReportController extends Controller
             'category' => ['required', 'in:'.implode(',', array_keys(IssueReport::CATEGORIES))],
             'description' => ['required', 'string', 'min:20', 'max:3000'],
             'location' => ['required', 'string', 'max:220'],
-            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
-            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'latitude' => ['nullable', 'required_with:longitude', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'required_with:latitude', 'numeric', 'between:-180,180'],
             'photo' => ['nullable', 'image', 'max:4096'],
         ]);
 

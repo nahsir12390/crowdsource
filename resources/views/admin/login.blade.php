@@ -11,7 +11,6 @@
                 <x-field-error name="password" />
             </div>
             <button class="mt-6 w-full rounded-md bg-[#0f6b5b] px-4 py-2.5 text-sm font-bold text-white hover:bg-[#0b584b]">Enter admin</button>
-            <p class="mt-4 text-xs text-[#647067]">Default password: <span class="font-semibold">admin123</span></p>
         </form>
     </section>
 </x-layouts.app>

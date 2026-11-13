@@ -21,10 +21,11 @@ class IssueReportController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        if ($validated['password'] !== config('app.admin_password', 'admin123')) {
+        if (! config('app.admin_password') || ! hash_equals((string) config('app.admin_password'), $validated['password'])) {
             return back()->withErrors(['password' => 'The admin password is incorrect.']);
         }
 
+        $request->session()->regenerate();
         $request->session()->put('is_admin', true);
 
         return redirect()->route('admin.issues.index');
@@ -32,7 +33,8 @@ class IssueReportController extends Controller
 
     public function logout(Request $request): RedirectResponse
     {
-        $request->session()->forget('is_admin');
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return redirect()->route('issues.index');
     }
@@ -86,7 +88,7 @@ class IssueReportController extends Controller
             'admin_note' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        $validated['resolved_at'] = $validated['status'] === 'resolved' ? now() : null;
+        $validated['resolved_at'] = $validated['status'] === 'resolved' ? ($issue->resolved_at ?? now()) : null;
 
         $issue->update($validated);
 

@@ -28,7 +28,7 @@
                     <div><dt class="font-semibold text-[#647067]">Location</dt><dd>{{ $issue->location }}</dd></div>
                     <div><dt class="font-semibold text-[#647067]">Reported by</dt><dd>{{ $issue->reporter_name }}</dd></div>
                     <div><dt class="font-semibold text-[#647067]">Submitted</dt><dd>{{ $issue->created_at->format('M j, Y g:i A') }}</dd></div>
-                    @if($issue->latitude && $issue->longitude)
+                    @if($issue->latitude !== null && $issue->longitude !== null)
                         <div><dt class="font-semibold text-[#647067]">Coordinates</dt><dd>{{ $issue->latitude }}, {{ $issue->longitude }}</dd></div>
                     @endif
                 </dl>
