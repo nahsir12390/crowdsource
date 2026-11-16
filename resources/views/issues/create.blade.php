@@ -10,8 +10,18 @@
     </section>
 
     <section class="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-        <form action="{{ route('issues.store') }}" method="POST" enctype="multipart/form-data" class="overflow-hidden rounded-lg border border-[#d9ded4] bg-white shadow-sm">
+        <form action="{{ route('issues.store') }}" method="POST" enctype="multipart/form-data" id="issueReportForm" class="overflow-hidden rounded-lg border border-[#d9ded4] bg-white shadow-sm">
             @csrf
+            @if($errors->any())
+                <div id="validationSummary" role="alert" tabindex="-1" class="m-5 rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-900 sm:m-6">
+                    <h2 class="font-bold">Please correct these errors before submitting your report.</h2>
+                    <ul class="mt-2 list-inside list-disc space-y-1">
+                        @foreach($errors->messages() as $field => $messages)
+                            <li><a href="#field-{{ $field }}" class="underline underline-offset-2">{{ $messages[0] }}</a></li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             <div class="grid gap-0 lg:grid-cols-[1fr_320px]">
                 <div class="space-y-8 p-5 sm:p-6">
                     <div>
@@ -20,12 +30,12 @@
                         <div class="mt-5 grid gap-5 md:grid-cols-2">
                             <div class="md:col-span-2">
                                 <label class="text-sm font-semibold">Issue title</label>
-                                <input name="title" value="{{ old('title') }}" placeholder="Example: Broken drainage cover near main gate" class="mt-1 w-full rounded-md border border-[#cbd4ca] px-3 py-2.5 outline-none focus:border-[#0f6b5b] focus:ring-2 focus:ring-[#b9ddc7]" required>
+                                <input name="title" value="{{ old('title') }}" placeholder="Example: Broken drainage cover near main gate" class="mt-1 w-full rounded-md border border-[#cbd4ca] px-3 py-2.5 outline-none focus:border-[#0f6b5b] focus:ring-2 focus:ring-[#b9ddc7]" required id="field-title">
                                 <x-field-error name="title" />
                             </div>
                             <div>
                                 <label class="text-sm font-semibold">Category</label>
-                                <select name="category" class="mt-1 w-full rounded-md border border-[#cbd4ca] px-3 py-2.5 outline-none focus:border-[#0f6b5b] focus:ring-2 focus:ring-[#b9ddc7]" required>
+                                <select name="category" class="mt-1 w-full rounded-md border border-[#cbd4ca] px-3 py-2.5 outline-none focus:border-[#0f6b5b] focus:ring-2 focus:ring-[#b9ddc7]" required id="field-category">
                                     <option value="">Choose category</option>
                                     @foreach($categories as $value => $label)
                                         <option value="{{ $value }}" @selected(old('category') === $value)>{{ $label }}</option>
@@ -35,12 +45,12 @@
                             </div>
                             <div>
                                 <label class="text-sm font-semibold">Photo evidence</label>
-                                <input type="file" name="photo" accept="image/*" class="mt-1 w-full rounded-md border border-dashed border-[#aeb9af] bg-[#f9faf7] px-3 py-2.5 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-[#0f6b5b] file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-white">
+                                <input type="file" name="photo" accept="image/*" class="mt-1 w-full rounded-md border border-dashed border-[#aeb9af] bg-[#f9faf7] px-3 py-2.5 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-[#0f6b5b] file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-white" id="field-photo">
                                 <x-field-error name="photo" />
                             </div>
                             <div class="md:col-span-2">
                                 <label class="text-sm font-semibold">Description</label>
-                                <textarea name="description" rows="6" placeholder="Explain what is wrong, how serious it is, and anything that can help the team verify it." class="mt-1 w-full rounded-md border border-[#cbd4ca] px-3 py-2.5 outline-none focus:border-[#0f6b5b] focus:ring-2 focus:ring-[#b9ddc7]" required>{{ old('description') }}</textarea>
+                                <textarea name="description" rows="6" placeholder="Explain what is wrong, how serious it is, and anything that can help the team verify it." class="mt-1 w-full rounded-md border border-[#cbd4ca] px-3 py-2.5 outline-none focus:border-[#0f6b5b] focus:ring-2 focus:ring-[#b9ddc7]" required id="field-description">{{ old('description') }}</textarea>
                                 <x-field-error name="description" />
                             </div>
                         </div>
@@ -51,7 +61,7 @@
                         <p class="mt-1 text-sm text-[#647067]">No coordinates needed. A simple, clear description is enough.</p>
                         <div class="mt-5">
                             <label class="text-sm font-semibold">Where is the issue?</label>
-                            <input name="location" value="{{ old('location') }}" placeholder="Example: Beside science block, opposite the cafeteria" class="mt-1 w-full rounded-md border border-[#cbd4ca] px-3 py-2.5 outline-none focus:border-[#0f6b5b] focus:ring-2 focus:ring-[#b9ddc7]" required>
+                            <input name="location" value="{{ old('location') }}" placeholder="Example: Beside science block, opposite the cafeteria" class="mt-1 w-full rounded-md border border-[#cbd4ca] px-3 py-2.5 outline-none focus:border-[#0f6b5b] focus:ring-2 focus:ring-[#b9ddc7]" required id="field-location">
                             <x-field-error name="location" />
                         </div>
 
@@ -69,8 +79,8 @@
                                 </button>
                             </div>
                         </div>
-                        <x-field-error name="latitude" />
-                        <x-field-error name="longitude" />
+                        <span id="field-latitude"></span><x-field-error name="latitude" />
+                        <span id="field-longitude"></span><x-field-error name="longitude" />
                     </div>
 
                     <div class="border-t border-[#edf0e9] pt-8">
@@ -79,17 +89,17 @@
                         <div class="mt-5 grid gap-5 md:grid-cols-2">
                             <div>
                                 <label class="text-sm font-semibold">Your name</label>
-                                <input name="reporter_name" value="{{ old('reporter_name') }}" class="mt-1 w-full rounded-md border border-[#cbd4ca] px-3 py-2.5 outline-none focus:border-[#0f6b5b] focus:ring-2 focus:ring-[#b9ddc7]" required>
+                                <input name="reporter_name" value="{{ old('reporter_name') }}" class="mt-1 w-full rounded-md border border-[#cbd4ca] px-3 py-2.5 outline-none focus:border-[#0f6b5b] focus:ring-2 focus:ring-[#b9ddc7]" required id="field-reporter_name">
                                 <x-field-error name="reporter_name" />
                             </div>
                             <div>
                                 <label class="text-sm font-semibold">Phone number</label>
-                                <input name="reporter_phone" value="{{ old('reporter_phone') }}" class="mt-1 w-full rounded-md border border-[#cbd4ca] px-3 py-2.5 outline-none focus:border-[#0f6b5b] focus:ring-2 focus:ring-[#b9ddc7]">
+                                <input name="reporter_phone" value="{{ old('reporter_phone') }}" class="mt-1 w-full rounded-md border border-[#cbd4ca] px-3 py-2.5 outline-none focus:border-[#0f6b5b] focus:ring-2 focus:ring-[#b9ddc7]" id="field-reporter_phone">
                                 <x-field-error name="reporter_phone" />
                             </div>
                             <div class="md:col-span-2">
                                 <label class="text-sm font-semibold">Email</label>
-                                <input type="email" name="reporter_email" value="{{ old('reporter_email') }}" class="mt-1 w-full rounded-md border border-[#cbd4ca] px-3 py-2.5 outline-none focus:border-[#0f6b5b] focus:ring-2 focus:ring-[#b9ddc7]">
+                                <input type="email" name="reporter_email" value="{{ old('reporter_email') }}" class="mt-1 w-full rounded-md border border-[#cbd4ca] px-3 py-2.5 outline-none focus:border-[#0f6b5b] focus:ring-2 focus:ring-[#b9ddc7]" id="field-reporter_email">
                                 <x-field-error name="reporter_email" />
                             </div>
                         </div>
@@ -123,6 +133,22 @@
     </section>
 
     <script>
+        const reportForm = document.getElementById('issueReportForm');
+        const validationSummary = document.getElementById('validationSummary');
+        if (validationSummary) {
+            window.addEventListener('load', () => {
+                validationSummary.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                validationSummary.focus({ preventScroll: true });
+            });
+        }
+        reportForm?.addEventListener('invalid', (event) => {
+            const field = event.target;
+            if (!reportForm.dataset.validationHandled) {
+                reportForm.dataset.validationHandled = 'true';
+                field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                window.setTimeout(() => { delete reportForm.dataset.validationHandled; }, 300);
+            }
+        }, true);
         const button = document.getElementById('useLocationButton');
         const statusText = document.getElementById('locationStatus');
         const latitude = document.getElementById('latitude');
