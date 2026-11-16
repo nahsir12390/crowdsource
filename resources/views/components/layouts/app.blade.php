@@ -10,7 +10,7 @@
 </head>
 <body class="min-h-screen bg-[#f6f7f2] font-sans text-[#1f2522] antialiased">
     <div class="border-b border-[#d9ded4] bg-white/90">
-        <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+        <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
             <a href="{{ route('issues.index') }}" class="flex items-center gap-3">
                 <span class="grid h-10 w-10 place-items-center rounded-lg bg-[#0f6b5b] text-sm font-bold text-white">CT</span>
                 <span>
@@ -18,7 +18,7 @@
                     <span class="block text-xs text-[#647067]">Infrastructure issue reporting</span>
                 </span>
             </a>
-            <nav class="flex items-center gap-2 text-sm font-medium">
+            <nav class="flex w-full flex-wrap items-center gap-2 text-sm font-medium sm:w-auto">
                 <a href="{{ route('issues.index') }}" class="rounded-md px-3 py-2 text-[#415047] hover:bg-[#eef2ea]">Reports</a>
                 <a href="{{ route('issues.create') }}" class="rounded-md bg-[#0f6b5b] px-3 py-2 text-white hover:bg-[#0b584b]">Report issue</a>
                 @if(session('is_admin'))
@@ -28,7 +28,7 @@
                         <button class="rounded-md px-3 py-2 text-[#8b2f2f] hover:bg-[#f3e7e7]">Logout</button>
                     </form>
                 @else
-                    <a href="{{ route('admin.login') }}" class="hidden rounded-md px-3 py-2 text-[#415047] hover:bg-[#eef2ea] sm:inline-block">Admin</a>
+                    <a href="{{ route('admin.login') }}" class="rounded-md px-3 py-2 text-[#415047] hover:bg-[#eef2ea]">Admin</a>
                 @endif
             </nav>
         </div>
